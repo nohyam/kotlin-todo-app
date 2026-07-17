@@ -7,9 +7,12 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import com.example.todo.R
+import com.example.todo.model.Todo
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
-class TodoBottomSheetFragment(private val onTodoAdd : (String, String) -> Unit) : BottomSheetDialogFragment() {
+class TodoBottomSheetFragment(
+    private val todo: Todo? = null,
+    private val onTodoSave : (String, String) -> Unit) : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -17,6 +20,12 @@ class TodoBottomSheetFragment(private val onTodoAdd : (String, String) -> Unit) 
         val todoTitle = view.findViewById<EditText>(R.id.inputTitle)
         val todoContent = view.findViewById<EditText>(R.id.todoContents)
         val saveBtn = view.findViewById<Button>(R.id.todoSaveBtn)
+
+        if (todo != null){
+            todoTitle.setText(todo.title)
+            todoContent.setText(todo.contents)
+            saveBtn.text = "수정"
+        }
 
         saveBtn.setOnClickListener {
             val title = todoTitle.text.toString().trim()
@@ -27,7 +36,7 @@ class TodoBottomSheetFragment(private val onTodoAdd : (String, String) -> Unit) 
                 return@setOnClickListener
             }
 
-            onTodoAdd(title,contents)
+            onTodoSave(title,contents)
 
             dismiss()
         }
