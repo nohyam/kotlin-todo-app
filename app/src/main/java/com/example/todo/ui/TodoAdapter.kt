@@ -7,16 +7,16 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todo.R
 import com.example.todo.model.Todo
 
 class TodoAdapter(
-    private val todoList: List<Todo>,
     private val onTodoChecked: (Todo) -> Unit,
     private val onTodoDelete: (Todo) -> Unit,
     private val onTodoClick: (Todo) -> Unit,
-) : RecyclerView.Adapter<TodoAdapter.TodoViewHolder>() {
+) : ListAdapter<Todo, TodoAdapter.TodoViewHolder>(TodoDiffCallback()) {
     class TodoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val titleText = itemView.findViewById<TextView>(R.id.titleText)
         val todoCheckBox = itemView.findViewById<CheckBox>(R.id.todoCheckBox)
@@ -34,7 +34,7 @@ class TodoAdapter(
     }
 
     override fun onBindViewHolder(holder: TodoAdapter.TodoViewHolder, position: Int) {
-        val todo = todoList[position]
+        val todo = getItem(position)
 
         holder.titleText.text = todo.title
         holder.todoCheckBox.isChecked = todo.isCompleted
@@ -58,10 +58,6 @@ class TodoAdapter(
         holder.titleText.setOnClickListener {
             onTodoClick(todo)
         }
-    }
-
-    override fun getItemCount(): Int {
-        return todoList.size
     }
 
 }
