@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var todoAdapter: TodoAdapter
 
-    private lateinit var todoList: List<Todo> = emptyList()
+    private var todoList: List<Todo> = emptyList()
     private var nextTodoId = 5L
 
 
