@@ -2,47 +2,46 @@ package com.example.todo.ui
 
 import android.os.Bundle
 import android.widget.ImageButton
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todo.R
+import com.example.todo.data.TodoDatabase
+import com.example.todo.data.TodoRepository
 import com.example.todo.model.Todo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
+    private val viewModel: TodoViewModel by viewModels {
+        val database = TodoDatabase.getDatabase(applicationContext)
+        val repository = TodoRepository(database.todoDao())
+
+        TodoViewModelFactory(repository)
+    }
+
     private lateinit var todoAdapter: TodoAdapter
 
-    private var todoList: List<Todo> = emptyList()
-    private var nextTodoId = 5L
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        todoList = listOf(
-            Todo(title = "공부하기", id = 1L),
-            Todo(title = "요리하기", id = 2L),
-            Todo(title = "운동하기", id = 3L),
-            Todo(title = "독서하기", id = 4L),
-        )
-
         val todoRecyclerView = findViewById<RecyclerView>(R.id.todoRecyclerView)
         todoAdapter = TodoAdapter(
-            onTodoChecked = { checkedTodo ->
-                todoList = todoList.map { todo ->
-                    if (todo.id == checkedTodo.id) {
-                        todo.copy(
-                            isCompleted = !todo.isCompleted
-                        )
-                    } else {
-                        todo
-                    }
-                }
-                todoAdapter.submitList(todoList)
+            onTodoChecked = { todo ->
+                val checkedTodo = todo.copy(
+                    isCompleted = !todo.isCompleted
+                )
+                viewModel.updateTodo(checkedTodo)
             },
-            onTodoDelete = { deleteTodo ->
+            onTodoDelete = { todo ->
                 MaterialAlertDialogBuilder(this)
                     .setTitle("정말 삭제하시겠습니까?")
                     .setMessage("삭제하면 복구하실수 없습니다.")
@@ -51,10 +50,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     .setPositiveButton("삭제") { _, _ ->
 
-                        todoList = todoList.filterNot {
-                            it.id == deleteTodo.id
-                        }
-                        todoAdapter.submitList(todoList)
+                        viewModel.deleteTodo(todo)
 
 
                     }
@@ -69,31 +65,21 @@ class MainActivity : AppCompatActivity() {
                             contents = todoContents
                         )
 
-                        todoList = todoList.map { todo ->
-                            if (todo.id == updatedTodo.id) {
-                                updatedTodo
-                            } else {
-                                todo
-                            }
-                        }
-                        todoAdapter.submitList(todoList)
+                        viewModel.updateTodo(updatedTodo)
+
                     }
                 todoUpdateBottomSheet.show(supportFragmentManager, "TodoBottomSheet")
             }
         )
 
-        todoAdapter.submitList(todoList)
 
         findViewById<ImageButton>(R.id.todoAddBtn).setOnClickListener {
             val todoBottomSheet = TodoBottomSheetFragment { todoTitle, todoContents ->
                 val todo = Todo(
-                    id = nextTodoId++,
                     title = todoTitle,
                     contents = todoContents
                 )
-
-                todoList = todoList + todo
-                todoAdapter.submitList(todoList)
+                viewModel.insertTodo(todo)
             }
             todoBottomSheet.show(supportFragmentManager, "TodoBottomSheet")
         }
@@ -101,6 +87,14 @@ class MainActivity : AppCompatActivity() {
 
         todoRecyclerView.adapter = todoAdapter
         todoRecyclerView.layoutManager = LinearLayoutManager(this)
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.todos.collect { todos ->
+                    todoAdapter.submitList(todos)
+                }
+            }
+        }
 
     }
 }
