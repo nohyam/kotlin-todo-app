@@ -8,15 +8,15 @@ class TodoRepository(private val todoDao: TodoDao) {
         return todoDao.getAllTodos()
     }
 
-    suspend fun insetTodo(todo: Todo){
-        return todoDao.insetTodo(todo)
+    suspend fun insertTodo(todo: Todo){
+        todoDao.insertTodo(todo)
     }
 
     suspend fun updateTodo(todo: Todo){
-        return todoDao.updateTodo(todo)
-    }
+        todoDao.updateTodo(todo)
+    }   
 
     suspend fun deleteTodo(todo: Todo){
-        return todoDao.deleteTodo(todo)
+        todoDao.deleteTodo(todo)
     }
 }

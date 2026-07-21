@@ -1,7 +1,9 @@
 package com.example.todo.ui
 
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
@@ -15,6 +17,9 @@ import com.example.todo.data.TodoRepository
 import com.example.todo.model.Todo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import kotlin.time.Instant
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,11 +32,15 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var todoAdapter: TodoAdapter
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val dateText = findViewById<TextView>(R.id.dateText)
+        val today = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")
+
+        dateText.text = today.format(formatter)
 
         val todoRecyclerView = findViewById<RecyclerView>(R.id.todoRecyclerView)
         todoAdapter = TodoAdapter(

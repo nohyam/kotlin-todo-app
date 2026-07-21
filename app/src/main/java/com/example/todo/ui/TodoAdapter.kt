@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todo.R
@@ -21,7 +23,9 @@ class TodoAdapter(
         val titleText = itemView.findViewById<TextView>(R.id.titleText)
         val todoCheckBox = itemView.findViewById<CheckBox>(R.id.todoCheckBox)
 
+        val contentText = itemView.findViewById<TextView>(R.id.contentText)
         val todoRemoveBtn = itemView.findViewById<ImageButton>(R.id.removeBtn)
+        val todoItem = itemView.findViewById<LinearLayout>(R.id.todoItem)
 
     }
 
@@ -39,6 +43,15 @@ class TodoAdapter(
         holder.titleText.text = todo.title
         holder.todoCheckBox.isChecked = todo.isCompleted
 
+        if (todo.contents.isBlank()){
+            holder.contentText.visibility = View.GONE
+
+        }else{
+            holder.contentText.visibility = View.VISIBLE
+            holder.contentText.text = todo.contents
+        }
+
+
         holder.todoCheckBox.setOnClickListener {
             onTodoChecked(todo)
         }
@@ -55,7 +68,7 @@ class TodoAdapter(
             onTodoDelete(todo)
         }
 
-        holder.titleText.setOnClickListener {
+        holder.todoItem.setOnClickListener {
             onTodoClick(todo)
         }
     }

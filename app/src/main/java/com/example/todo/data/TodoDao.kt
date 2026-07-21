@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TodoDao {
     @Insert
-    suspend fun insetTodo(todo: Todo)
+    suspend fun insertTodo(todo: Todo)
 
     @Query("SELECT * FROM todos ORDER BY createdAt ASC")
     fun getAllTodos(): Flow<List<Todo>>
